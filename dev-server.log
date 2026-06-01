@@ -1,0 +1,17 @@
+
+> dev
+> react-router dev
+
+Port 5173 is in use, trying another one...
+  [32m➜[39m  [1mLocal[22m:   [36mhttp://localhost:[1m5174[22m/[39m
+[2m  [32m➜[39m  [1mNetwork[22m[2m: use [22m[1m--host[22m[2m to expose[22m
+[2m[32m  ➜[39m[22m[2m  press [22m[1mh + enter[22m[2m to show help[22m
+[2m11:38:09 am[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m connected.
+[2m11:39:10 am[22m [36m[1m[vite][22m[39m changed tsconfig file detected: C:/Users/ayash/OneDrive/Desktop/Ai resume Anlayzer/tsconfig.json - Clearing cache and forcing full-reload to ensure TypeScript is compiled with updated config values.
+[2m11:39:10 am[22m [36m[1m[vite][22m[39m changed tsconfig file detected: C:/Users/ayash/OneDrive/Desktop/Ai resume Anlayzer/tsconfig.json - Clearing cache and forcing full-reload to ensure TypeScript is compiled with updated config values.
+[2m11:39:10 am[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m program reload
+[2m11:39:17 am[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m program reload
+[2m12:23:51 pm[22m [36m[1m[vite][22m[39m changed tsconfig file detected: C:/Users/ayash/OneDrive/Desktop/Ai resume Anlayzer/tsconfig.json - Clearing cache and forcing full-reload to ensure TypeScript is compiled with updated config values.
+[2m12:23:51 pm[22m [36m[1m[vite][22m[39m changed tsconfig file detected: C:/Users/ayash/OneDrive/Desktop/Ai resume Anlayzer/tsconfig.json - Clearing cache and forcing full-reload to ensure TypeScript is compiled with updated config values.
+[2m12:23:51 pm[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m program reload
+[2m12:23:51 pm[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m program reload
