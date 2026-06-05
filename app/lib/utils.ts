@@ -1,8 +1,64 @@
-import {type ClassValue, clsx} from "clsx";
-import {twMerge} from "tailwind-merge";
+import { type ClassValue, clsx } from "clsx";
+import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
+  return twMerge(clsx(inputs));
+}
+
+const normalizeATSTip = (tip: any) => {
+  if (typeof tip === "string") {
+    return { type: "improve", tip };
+  }
+
+  return {
+    type: tip?.type === "good" ? "good" : "improve",
+    tip: typeof tip?.tip === "string" ? tip.tip : String(tip ?? ""),
+  };
+};
+
+const normalizeCategoryTip = (tip: any) => {
+  if (typeof tip === "string") {
+    return {
+      type: "improve" as const,
+      tip,
+      explanation: "",
+    };
+  }
+
+  return {
+    type: tip?.type === "good" ? "good" : "improve",
+    tip: typeof tip?.tip === "string" ? tip.tip : String(tip ?? ""),
+    explanation: typeof tip?.explanation === "string" ? tip.explanation : "",
+  };
+};
+
+const normalizeCategory = (category: any) => ({
+  score: typeof category?.score === "number" ? category.score : 0,
+  tips: Array.isArray(category?.tips)
+    ? category.tips.map(normalizeCategoryTip)
+    : [],
+});
+
+export function normalizeFeedback(feedback: any): Feedback {
+  return {
+    overallScore:
+      typeof feedback?.overallScore === "number"
+        ? feedback.overallScore
+        : 0,
+    ATS: {
+      score:
+        typeof feedback?.ATS?.score === "number"
+          ? feedback.ATS.score
+          : 0,
+      tips: Array.isArray(feedback?.ATS?.tips)
+        ? feedback.ATS.tips.map(normalizeATSTip)
+        : [],
+    },
+    toneAndStyle: normalizeCategory(feedback?.toneAndStyle),
+    content: normalizeCategory(feedback?.content),
+    structure: normalizeCategory(feedback?.structure),
+    skills: normalizeCategory(feedback?.skills),
+  };
 }
 
 export function formatSize(bytes: number): string {

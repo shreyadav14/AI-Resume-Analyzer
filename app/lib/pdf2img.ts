@@ -13,14 +13,19 @@ async function loadPdfJs(): Promise<any> {
   if (loadPromise) return loadPromise;
 
   isLoading = true;
-  // @ts-expect-error - pdfjs-dist/build/pdf.mjs is not a module
-  loadPromise = import("pdfjs-dist/build/pdf.mjs").then((lib) => {
-    // Set the worker source to use local file
-    lib.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
-    pdfjsLib = lib;
-    isLoading = false;
-    return lib;
-  });
+  // @ts-ignore
+  loadPromise = import("pdfjs-dist/build/pdf.mjs")
+    .catch(
+      // @ts-ignore
+      () => import("pdfjs-dist/legacy/build/pdf.mjs")
+    )
+    .then((lib) => {
+      // Set the worker source to use local file
+      lib.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
+      pdfjsLib = lib;
+      isLoading = false;
+      return lib;
+    });
 
   return loadPromise;
 }
@@ -42,12 +47,18 @@ export async function convertPdfToImage(
     canvas.width = viewport.width;
     canvas.height = viewport.height;
 
-    if (context) {
-      context.imageSmoothingEnabled = true;
-      context.imageSmoothingQuality = "high";
+    if (!context) {
+      return {
+        imageUrl: "",
+        file: null,
+        error: "Unable to create canvas rendering context.",
+      };
     }
 
-    await page.render({ canvasContext: context!, viewport }).promise;
+    context.imageSmoothingEnabled = true;
+    context.imageSmoothingQuality = "high";
+
+    await page.render({ canvasContext: context, viewport }).promise;
 
     return new Promise((resolve) => {
       canvas.toBlob(

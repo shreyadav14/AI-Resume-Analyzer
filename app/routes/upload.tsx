@@ -4,7 +4,7 @@ import FileUploader from "~/Components/fileUploader";
 import { usePuterStore } from "~/lib/puter";
 import { useNavigate } from "react-router";
 import { convertPdfToImage } from "~/lib/pdf2img";
-import { generateUUID } from "~/lib/utils";
+import { generateUUID, normalizeFeedback } from "~/lib/utils";
 import { prepareInstructions } from "~/Constants/index";
 const Upload = () => {
   const { fs, ai, kv } = usePuterStore();
@@ -48,16 +48,22 @@ const Upload = () => {
 
       setStatusText("Converting PDF to image...");
 
-      const imageFile = await convertPdfToImage(file);
+      const imageResult = await convertPdfToImage(file);
+      const imageFile = imageResult.file;
 
       if (!imageFile) {
-        setStatusText("Failed to convert PDF.");
+        console.error("PDF conversion failed:", imageResult.error);
+        setStatusText(
+          imageResult.error
+            ? `PDF conversion failed: ${imageResult.error}`
+            : "Failed to convert PDF. Please upload a valid PDF file."
+        );
         return;
       }
 
       setStatusText("Uploading image...");
 
-      const uploadedImage = await fs.upload([file]);
+      const uploadedImage = await fs.upload([imageFile]);
 
       if (!uploadedImage) {
         setStatusText("Failed to upload image.");
@@ -103,23 +109,32 @@ Analyze this resume and provide ATS feedback, strengths, weaknesses, keyword mat
         "Analysis complete! Redirecting..."
       );
 
-      const feedback:AIResponse|undefined= await ai.feedback(
+      const feedback: AIResponse | undefined = await ai.feedback(
         uploadFile.path,
-        prepareInstructions({jobTitle, jobDescription, AIResponseFormat: "json",})
-      ); 
-      if(!feedback){
+        prepareInstructions({
+          jobTitle,
+          jobDescription,
+          AIResponseFormat: "json",
+        })
+      );
+      if (!feedback) {
         setStatusText("Failed to get feedback from AI.");
         return;
       }
 
-      const feedbackText:any =typeof feedback === "string" ? feedback : JSON.stringify(feedback);
+      const feedbackText: any =
+        typeof feedback === "string" ? feedback : JSON.stringify(feedback);
 
-      data.feedback = JSON.parse(feedbackText);
+      let parsedFeedback: any = null;
+      try {
+        parsedFeedback = JSON.parse(feedbackText);
+      } catch (err) {
+        console.warn("Failed to parse AI feedback JSON:", err);
+      }
 
-        await kv.set(
-          `resume:${uuid}`,
-          JSON.stringify(data)
-        );
+      data.feedback = normalizeFeedback(parsedFeedback);
+
+      await kv.set(`resume:${uuid}`, JSON.stringify(data));
 
         setStatusText(
           "Feedback received! Redirecting..."
@@ -132,6 +147,8 @@ Analyze this resume and provide ATS feedback, strengths, weaknesses, keyword mat
     } catch (error) {
       console.error(error);
       setStatusText("Something went wrong.");
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -172,21 +189,22 @@ Analyze this resume and provide ATS feedback, strengths, weaknesses, keyword mat
         <div className="page-heading py-16">
           <h1>Smart feedback for your dream job</h1>
 
-          {isProcessing ? (
-            <>
-              <h2>{statusText}</h2>
+          <h2>
+            {isProcessing
+              ? statusText
+              : "Drop your resume for an ATS score and improvement tips"}
+          </h2>
 
-              <img
-                src="/images/resume-scan.gif"
-                className="w-full"
-                alt="Scanning resume"
-              />
-            </>
-          ) : (
-            <h2>
-              Drop your resume for an ATS score and
-              improvement tips
-            </h2>
+          {isProcessing && (
+            <img
+              src="/images/resume-scan.gif"
+              className="w-full"
+              alt="Scanning resume"
+            />
+          )}
+
+          {!isProcessing && statusText && (
+            <p className="mt-4 text-sm text-red-600">{statusText}</p>
           )}
 
           {!isProcessing && (
